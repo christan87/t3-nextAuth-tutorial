@@ -28,7 +28,9 @@ export const authOptions: NextAuthOptions = {
     debug: true,
 };
 export default NextAuth(authOptions);
-// Set the Prisma adapter as a top-level option, not within the callbacks
+
+
+//Set the Prisma adapter as a top-level option, not within the callbacks
 // export default NextAuth({
 //     ...authOptions,
 //     adapter: PrismaAdapter(prisma),

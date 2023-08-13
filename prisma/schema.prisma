@@ -10,6 +10,14 @@ datasource db {
   relationMode = "prisma"
 }
 
+model Post {
+    id String @id @default(cuid())
+    createdAt DateTime @default(now())
+    content String @db.VarChar(255)
+    authorId String
+    @@index([authorId]) // allows you to index by author id to search by author id
+}
+
 model Example {
     id        String   @id @default(cuid())
     createdAt DateTime @default(now())
@@ -23,12 +31,12 @@ model Account {
     type              String
     provider          String
     providerAccountId String
-    refresh_token     String? // @db.Text
-    access_token      String? // @db.Text
+    refresh_token     String?  @db.Text
+    access_token      String?  @db.Text
     expires_at        Int?
     token_type        String?
     scope             String?
-    id_token          String? // @db.Text
+    id_token          String?  @db.Text
     session_state     String?
     user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
