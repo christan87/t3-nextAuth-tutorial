@@ -1,11 +1,12 @@
 import { signIn, signOut, useSession } from "next-auth/react";
 import Head from "next/head";
 import Link from "next/link";
-import { RouterOutputs, api } from "~/utils/api";
-
+import { api } from "~/utils/api";
+import type { RouterOutputs } from "~/utils/api";
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import Image from "next/image";
+import { LoadingSpinner } from "~/components/loading";
 dayjs.extend(relativeTime);
 
 const CreatePostWizard = () => {
@@ -56,7 +57,9 @@ const PostView = (props: PostWithUser) => {
 export default function Home() {
   const { data : session } = useSession();
   const { data, isLoading } = api.posts.getAll.useQuery();
-  if(isLoading) return <div>Loading...</div>
+
+  if(isLoading) return <LoadingSpinner />
+
   if(!data) return <div>Something Went Wrong...</div>
   const user = session?.user;
 
