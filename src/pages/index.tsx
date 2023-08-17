@@ -6,7 +6,7 @@ import type { RouterOutputs } from "~/utils/api";
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import Image from "next/image";
-import { LoadingSpinner } from "~/components/loading";
+import { LoadingPage} from "~/components/loading";
 dayjs.extend(relativeTime);
 
 const CreatePostWizard = () => {
@@ -54,14 +54,24 @@ const PostView = (props: PostWithUser) => {
   )
 }
 
-export default function Home() {
-  const { data : session } = useSession();
-  const { data, isLoading } = api.posts.getAll.useQuery();
-
-  if(isLoading) return <LoadingSpinner />
-
+const Feed = () => {
+  const { data, isLoading: postsLoading } = api.posts.getAll.useQuery();
+  if(postsLoading) return <LoadingPage />
   if(!data) return <div>Something Went Wrong...</div>
+
+  return (
+    <div className="flex flex-col ">
+      {[...data, ...data]?.map((fullPost, i) => (<PostView {...fullPost} key={`${fullPost.post.id}${i}`}/>))}
+    </div>
+  );
+}
+
+export default function Home() {
+  const { data : session,  } = useSession();
+  api.posts.getAll.useQuery();
   const user = session?.user;
+
+  if(!user) return <div />
 
   return (
     <>
@@ -83,9 +93,7 @@ export default function Home() {
               </button>*/}
             </div>
           </div>
-          <div className="flex flex-col ">
-            {[...data, ...data]?.map((fullPost) => (<PostView {...fullPost} key={fullPost.post.id}/>))}
-          </div>
+          <Feed />
         </div>
       </main>
     </>
