@@ -1,9 +1,9 @@
-import { z } from "zod";
+// import { z } from "zod";
 import {
   createTRPCRouter,
   publicProcedure,
 } from "~/server/api/trpc";
-import { useSession } from "next-auth/react";
+//import { useSession } from "next-auth/react";
 import type { User } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 
