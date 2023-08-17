@@ -55,7 +55,11 @@ export const createTRPCContext = async (opts: CreateNextContextOptions) => {
 
   // Get the session from the server using the getServerSession wrapper function
   const session = await getServerAuthSession({ req, res });
-
+  return{
+    session, 
+    prisma,
+    currentUser: session?.user
+  }
   return createInnerTRPCContext({
     session,
   });
@@ -115,6 +119,7 @@ const enforceUserIsAuthed = t.middleware(({ ctx, next }) => {
     ctx: {
       // infers the `session` as non-nullable
       session: { ...ctx.session, user: ctx.session.user },
+      currentUser: ctx.session.user
     },
   });
 });
@@ -128,3 +133,4 @@ const enforceUserIsAuthed = t.middleware(({ ctx, next }) => {
  * @see https://trpc.io/docs/procedures
  */
 export const protectedProcedure = t.procedure.use(enforceUserIsAuthed);
+export const privateProcedure = t.procedure.use(enforceUserIsAuthed);

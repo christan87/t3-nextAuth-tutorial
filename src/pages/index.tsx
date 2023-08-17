@@ -1,5 +1,6 @@
 import { signIn, signOut, useSession } from "next-auth/react";
 import Head from "next/head";
+import { useState } from "react";
 import Link from "next/link";
 import { api } from "~/utils/api";
 import type { RouterOutputs } from "~/utils/api";
@@ -12,6 +13,14 @@ dayjs.extend(relativeTime);
 const CreatePostWizard = () => {
   const { data : session } = useSession();
   const user = session?.user;
+  const ctx = api.useContext();
+  const { mutate, isLoading: isPosting } = api.posts.create.useMutation({
+    onSuccess: () => {
+      setInput("");
+      ctx.posts.getAll.invalidate();
+    }
+  });
+  const [input, setInput] = useState("");
   if(!user) return null;
   return (
     <div className="flex w-full gap-3">
@@ -25,7 +34,12 @@ const CreatePostWizard = () => {
       <input 
         placeholder="Type some emojis!"
         className="bg-transparent grow outline-none"
+        type="text"
+        value={input}
+        onChange={(e) => setInput(e.target.value)}
+        disabled={isPosting}
       />
+      <button onClick={() => mutate({content: input})}>Post</button>
     </div>
   )
 }
@@ -61,7 +75,7 @@ const Feed = () => {
 
   return (
     <div className="flex flex-col ">
-      {[...data, ...data]?.map((fullPost, i) => (<PostView {...fullPost} key={`${fullPost.post.id}${i}`}/>))}
+      {data?.map((fullPost, i) => (<PostView {...fullPost} key={fullPost.post.id}/>))}
     </div>
   );
 }

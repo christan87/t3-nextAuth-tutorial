@@ -1,6 +1,7 @@
 import { z } from "zod";
 import {
   createTRPCRouter,
+  privateProcedure,
   publicProcedure,
 } from "~/server/api/trpc";
 import { useSession } from "next-auth/react";
@@ -19,6 +20,7 @@ export const postsRouter = createTRPCRouter({
   getAll: publicProcedure.query(async ({ ctx }) => {
     const posts = await ctx.prisma.post.findMany({
       take: 100,
+      orderBy: [{createdAt: 'desc'}]
     });
     const authorIds = posts.map((post) => post.authorId);
     const users = await ctx.prisma.user.findMany({
@@ -43,5 +45,16 @@ export const postsRouter = createTRPCRouter({
         author
       }
     });
+  }),
+
+  create: privateProcedure.input(z.object({content: z.string().emoji().min(1).max(280)})).mutation(async({ctx, input}) => {
+    const authorId = ctx.currentUser.id
+    const post = await ctx.prisma.post.create({
+      data:{
+        authorId,
+        content: input.content
+      }
+    });
+    return post
   }),
 });
