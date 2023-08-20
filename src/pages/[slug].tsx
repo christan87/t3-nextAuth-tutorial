@@ -1,12 +1,10 @@
-import { useSession } from "next-auth/react";
+//import { useSession } from "next-auth/react";
 import type { NextPage } from "next";
 import Head from "next/head";
 import { api } from "~/utils/api";
-import { useRouter } from 'next/router';
 
 const ProfilePage: NextPage<{username: string}> = ({username}) => {
   const {data: user} = api.profile.getUserByUserName.useQuery({username});
-  const router = useRouter();
   if(!user) return <div>404</div>
   
   return (

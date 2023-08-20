@@ -4,7 +4,7 @@ import {
   privateProcedure,
   publicProcedure,
 } from "~/server/api/trpc";
-import { useSession } from "next-auth/react";
+//import { useSession } from "next-auth/react";
 import { TRPCError } from "@trpc/server";
 import { filterUserForClient } from "~/server/helpers/filterUserForClient";
 

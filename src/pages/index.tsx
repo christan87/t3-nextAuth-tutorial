@@ -1,4 +1,4 @@
-import { signIn, signOut, useSession } from "next-auth/react";
+import { signIn, useSession } from "next-auth/react";
 import { useState } from "react";
 import Link from "next/link";
 import { api } from "~/utils/api";
@@ -93,7 +93,7 @@ const Feed = () => {
 
   return (
     <div className="flex flex-col ">
-      {data?.map((fullPost, i) => (<PostView {...fullPost} key={fullPost.post.id}/>))}
+      {data?.map((fullPost) => (<PostView {...fullPost} key={fullPost.post.id}/>))}
     </div>
   );
 }

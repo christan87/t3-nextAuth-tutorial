@@ -1,7 +1,6 @@
 import { useSession } from "next-auth/react";
 import type { NextPage } from "next";
 import Head from "next/head";
-import { api } from "~/utils/api";
 import { useRouter } from 'next/router';
 
 const SinglePostPage: NextPage = () => {
