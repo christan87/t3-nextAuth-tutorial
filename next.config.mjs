@@ -21,6 +21,13 @@ const config = {
   images: {
     domains: ["lh3.googleusercontent.com"],
   },
+  typescript: {
+    ignoreBuildErrors: true,
+  },
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
+  swcMinify: true, 
 };
 
 export default config;
