@@ -10,6 +10,34 @@ import { filterUserForClient } from "~/server/helpers/filterUserForClient";
 
 import { Ratelimit } from "@upstash/ratelimit"; // for deno: see above
 import { Redis } from "@upstash/redis";
+import type { Post } from "@prisma/client";
+import { prisma } from "~/server/db";
+
+const addUserDataToPosts = async (posts: Post[]) => {
+  const authorIds = posts.map((post) => post.authorId);
+  const users = await prisma.user.findMany({
+    where: {
+      id: {
+        in: authorIds
+      }
+    },
+    take: 100,
+  });
+  
+  return posts.map((post) => {
+    const author = users.map(filterUserForClient).find((user) => user.id === post.authorId);
+    if(!author){
+      throw new TRPCError({
+        code: "INTERNAL_SERVER_ERROR",
+        message: "Author for post not found"
+      })
+    }
+    return{
+      post,
+      author
+    }
+  });
+}
 
 // Create a new ratelimiter, that allows 3 requests per 1 minute
 const ratelimit = new Ratelimit({
@@ -30,30 +58,18 @@ export const postsRouter = createTRPCRouter({
       take: 100,
       orderBy: [{createdAt: 'desc'}]
     });
-    const authorIds = posts.map((post) => post.authorId);
-    const users = await ctx.prisma.user.findMany({
-      where: {
-        id: {
-          in: authorIds
-        }
-      },
-      take: 100,
-    });
-    
-    return posts.map((post) => {
-      const author = users.map(filterUserForClient).find((user) => user.id === post.authorId);
-      if(!author){
-        throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message: "Author for post not found"
-        })
-      }
-      return{
-        post,
-        author
-      }
-    });
+    return addUserDataToPosts(posts)
   }),
+
+  getPostsByUserId: publicProcedure.input(z.object({
+    userId: z.string()
+  })).query(({ctx, input}) => ctx.prisma.post.findMany({
+    where:{
+      authorId: input.userId
+    },
+    take: 100,
+    orderBy: [{ createdAt: "desc" }]
+  }).then(addUserDataToPosts)),
 
   create: privateProcedure.input(z.object({content: z.string().emoji("Only emojis are allowed").min(1).max(280)})).mutation(async({ctx, input}) => {
     const authorId = ctx.currentUser.id
