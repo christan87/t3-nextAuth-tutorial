@@ -5,16 +5,8 @@ import {
   publicProcedure,
 } from "~/server/api/trpc";
 import { useSession } from "next-auth/react";
-import type { User } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
-
-const filterUserForClient = (user: User) => {
-  return {
-    id: user.id, 
-    username: user.name,
-    profileImageUrl: user.image
-  }
-}
+import { filterUserForClient } from "~/server/helpers/filterUserForClient";
 
 import { Ratelimit } from "@upstash/ratelimit"; // for deno: see above
 import { Redis } from "@upstash/redis";
