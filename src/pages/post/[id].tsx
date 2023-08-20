@@ -1,26 +1,47 @@
-import { useSession } from "next-auth/react";
+//import { useSession } from "next-auth/react";
 import type { NextPage } from "next";
 import Head from "next/head";
-import { useRouter } from 'next/router';
+import { api } from "~/utils/api";
+//SSG Helper Imports
+import type { GetStaticProps } from "next";
+import { PageLayout } from "~/components/layout";
+import { PostView } from "~/components/postview";
+import { generateSSGHelper } from "~/server/helpers/ssgHelpers";
 
-const SinglePostPage: NextPage = () => {
-  const { data : session,  } = useSession();
-  const user = session?.user;
-  const router = useRouter();
+const PostPage: NextPage<{id: string}> = ({id}) => {
+  const {data} = api.posts.getPostById.useQuery({id});
+  if(!data) return <div>404</div>
+  
   return (
     <>
       <Head>
-        <title>Post</title>
+        <title>{`${data.post.content} - @${data.author.username}`}</title>
       </Head>
-      <main className="flex h-screen justify-center">
-        <div className="flex flex-col items-center">
-          <div>Post View</div>
-          {user && <div>{`${user.name}'s Post`}</div>}
-          <button className=" mt-3 bg-slate-400 hover:bg-transparent duration-300 rounded-md" onClick={() => router.back()}>Go back</button>
-        </div>
-      </main>
+      <PageLayout>
+        <PostView {...data} />
+      </PageLayout>
     </>
   );
 }
 
-export default SinglePostPage;
+export const getStaticProps: GetStaticProps = async (context) => {
+  const ssg = generateSSGHelper();
+
+  const id = context.params?.id;
+  if(typeof id !== "string") throw new Error("no id");
+
+  await ssg.posts.getPostById.prefetch({id});
+
+  return({
+    props:{
+      trpcState: ssg.dehydrate(),
+      id,
+    }
+  })
+}
+
+export const getStaticPaths = () => {
+  return {paths: [], fallback: "blocking"}
+}
+
+export default PostPage;
